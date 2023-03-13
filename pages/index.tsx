@@ -24,20 +24,11 @@ type Items = {
   url?: string;
 };
 
-export default function Home({ items }: any, { issues }: any) {
-  // console.log("items", items);
-  // console.log("issues", issues);
+export default function Home({ items }: any) {
   const [showItems, setShowItems] = useState([]);
 
   useEffect(() => {
-    // if (items === "") {
-    //   setShowItems(items);
-    //   // setShowItems([]);
-
-    //   return;
-    // }
     setShowItems(items);
-    // setShowItems([]);
   }, []);
 
   // 一致しているものを返す関数
@@ -179,26 +170,12 @@ export async function getStaticProps() {
     `,
   });
 
-  // issue query
-  // issues(last: 10) {
-  //   edges {
-  //     node {
-  //       id
-  //       title
-  //       number
-  //     }
-  //   }
-  // }
-
   const { user } = data;
   const items = user.repositories.nodes.map((edge: Items) => edge);
-  // const issues = user.repositories.edge.node.map((edge: any) => edge);
-  // console.log(issues);
 
   return {
     props: {
       items,
-      // issues,
     },
   };
 }
