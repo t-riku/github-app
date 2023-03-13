@@ -19,39 +19,34 @@ type Items = {
 
 // post：getStaticPropsから取得したデータ
 export default ({ items }: any) => {
+  console.log("items", items);
   return (
-    <div>
-      <div className="detail-container">
-        <h3>Welcome to REST details page</h3>
-        <p>id: {items.id}</p>
-        <p>name: {items.name}</p>
-        <p>description: {items.description}</p>
-        <p>url: {items.url}</p>
-        <p>createdAt: {items.createdAt}</p>
-        <p>updatedAt: {items.updatedAt}</p>
-      </div>
-      <Link href={"/"}>Back</Link>
-    </div>
+    <>
+      {items.map((item: any, index: number) => {
+        return (
+          <div key={index}>
+            <p>name: {item.name}</p>
+            {item.description ? (
+              <p key={item.description}>{item.description}</p>
+            ) : (
+              ""
+            )}
+            {item.url ? (
+              <p key={item.url}>
+                url: <Link href={item.url}>{item.url}</Link>
+              </p>
+            ) : (
+              ""
+            )}
+          </div>
+        );
+      })}
+      <Link href={"/"} className="btn">
+        Back
+      </Link>
+    </>
   );
 };
-
-// const httpLink = createHttpLink({
-//   uri: "https://api.github.com/graphql/",
-// });
-
-// const authLink = setContext((_, { headers }) => {
-//   return {
-//     headers: {
-//       ...headers,
-//       authorization: `Bearer ${process.env.GITHUB_ACCESS_TOKEN}`,
-//     },
-//   };
-// });
-
-// const client = new ApolloClient({
-//   link: authLink.concat(httpLink),
-//   cache: new InMemoryCache(),
-// });
 
 export const getStaticPaths = async () => {
   // 外部APIエンドポイントを呼び出しデータ取得
@@ -77,7 +72,7 @@ export const getStaticPaths = async () => {
     query: gql`
       {
         user(login: "t-riku") {
-          repositories(last: 20) {
+          repositories(last: 30) {
             nodes {
               id
             }
@@ -133,7 +128,7 @@ export const getStaticProps = async ({ params }: any) => {
         user(login: "t-riku") {
           name
           url
-          repositories(last: 20) {
+          repositories(last: 30) {
             totalCount
             nodes {
               id
@@ -152,14 +147,10 @@ export const getStaticProps = async ({ params }: any) => {
 
   const { user } = data;
   const items = user.repositories.nodes.map((edge: Items) => edge);
-  // const issues = user.repositories.milestone.issues.noeds.map(
-  //   (edge: Items) => edge
-  // );
 
   return {
     props: {
       items,
-      // issues,
     },
   };
 };
