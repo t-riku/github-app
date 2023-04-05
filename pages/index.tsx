@@ -8,11 +8,12 @@ import {
 } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import styles from "../styles/Home.module.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { AiFillGithub } from "react-icons/ai";
 import { DiGithubFull } from "react-icons/di";
 import { QueryDocumentKeys } from "graphql/language/ast";
+import { text } from "stream/consumers";
 
 type Items = {
   id: string;
@@ -25,23 +26,57 @@ type Items = {
 };
 
 export default function Home({ items }: any) {
+  // inputに入力されたテキストの情報をtextRefに
+  const textRef = useRef(null);
+  // アイテム（ここではレポジトリ）の情報を保持する状態変数
   const [showItems, setShowItems] = useState([]);
+  // 何件ヒットしたかを保持する状態変数
+  const [results, setResults] = useState([]);
 
   useEffect(() => {
-    setShowItems(items);
+    setShowItems([]);
+    // setShowItems(items);
   }, []);
 
-  // 一致しているものを返す関数
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const result = items.filter((items: any) => {
-      // return item.title.toLowerCase().match(e.target.value.toLowerCase());
-      return items.name
-        .trim()
-        .toLowerCase()
-        .match(e.target.value.toLowerCase());
-    });
-    console.log(result);
-    setShowItems(result);
+  // const search = (value: string) => {
+  //   if (value !== "") {
+  //     const filteredList = items.filter((items: any) =>
+  //       Object.values(items).some(
+  //         (item: string) =>
+  //           item?.toUpperCase().indexOf(value.trim().toUpperCase()) !== -1
+  //       )
+  //     );
+  //     setShowItems(filteredList);
+  //     return;
+  //   }
+
+  //   setShowItems(items);
+  //   return;
+  // };
+
+  // const handleClick = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setInputValue(e.target.value);
+  //   search(e.target.value);
+  // };
+
+  // 一致しているものをクリックされると返す関数
+  const handleClick = (textRef: any) => {
+    // 検索ボックスに値が入っている場合
+    if (textRef !== "") {
+      const result = items.filter((items: any) => {
+        return items.name
+          .trim()
+          .toLowerCase()
+          .match(textRef.current.value.toLowerCase());
+      });
+      setResults(result);
+      setShowItems(result);
+      return;
+    }
+    // そもそもitemsには最初から30個のレポジトリの情報が入っているため、検索ボックスを空白のままにしても30件ヒットするのは当たり前
+    // なので検索を押した時にitemsを取ってこなきゃいけない？
+    setResults(items);
+    setShowItems(items);
   };
 
   return (
@@ -65,14 +100,16 @@ export default function Home({ items }: any) {
       </header>
 
       <main className={styles.main}>
-        <form action="" className={styles.form}>
-          <input
-            type="text"
-            placeholder="input repository name"
-            onChange={(e) => handleChange(e)}
-          />
-        </form>
+        <input ref={textRef} placeholder="input repository name" type="text" />
+        <button onClick={() => handleClick(textRef)} type="submit">
+          検索
+        </button>
 
+        {results.length === 0 ? (
+          <p>もう一度違う条件で検索して見てください。</p>
+        ) : (
+          <p>{results.length}件ヒットしました！</p>
+        )}
         {showItems ? (
           <>
             <div className={styles.viewer}>
