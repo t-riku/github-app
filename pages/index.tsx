@@ -54,10 +54,6 @@ export default function Home() {
     setSelectedRepo(null);
     // searchRepositories 関数を呼び出すと、クエリが実行されます。クエリの変数は、 variables オブジェクトを渡して渡される
     searchRepositories({ variables: { query } });
-    // searchRepositories({
-    //   variables: { queryString: query },
-    // });
-    console.log(data);
   };
 
   const handleLoadMore = () => {
@@ -99,7 +95,11 @@ export default function Home() {
 
       <header className={styles.header}>
         <h1 className={styles.title}>Github Repository Viewer!</h1>
-        <Link href="https://github.com/t-riku/github-app">
+        <Link
+          href="https://github.com/t-riku/github-app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <div className={styles.animateGithub}>
             <DiGithubFull className={styles.textGithub} />
             <div className={styles.circle01}></div>
@@ -157,10 +157,19 @@ export default function Home() {
                   >
                     <div className={styles.data_left}>
                       <p className={styles.name}> {node.name}</p>
-                      <p className={styles.desc}>📄 : {node.description}</p>
+                      {node.description ? (
+                        <p className={styles.desc}>📄 : {node.description}</p>
+                      ) : (
+                        <p className={styles.noDesc}>
+                          📄 : descriptionは設定されていません。
+                        </p>
+                      )}
                       <p className={styles.stargazer}>
                         ⭐️ : {node.stargazerCount}
                       </p>
+                      {/* <Link href={node.url}>
+                        <DiGithubFull className={styles.githubUrl} />
+                      </Link> */}
                     </div>
 
                     <div className={styles.data_right}>
