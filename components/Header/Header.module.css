@@ -1,0 +1,67 @@
+.header {
+  width: 100%;
+  padding: 1.3rem 2rem;
+  border-bottom: 1px solid #fff;
+  max-height: 10vh;
+  height: 10vh;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header .title {
+  font-size: 24px;
+  font-weight: bold;
+  color: transparent;
+  -webkit-text-stroke: 1px #000;
+  letter-spacing: 0px;
+}
+
+.animateGithub:hover .textGithub {
+  color: #000;
+}
+
+.animateGithub .textGithub,
+.animateGithub > div {
+  position: absolute;
+}
+
+.animateGithub .textGithub {
+  top: 4.3%;
+  right: 7%;
+  z-index: 1;
+  color: #fff;
+  /* transition: var(--transition); */
+}
+
+.animateGithub > div {
+  width: 30px;
+  height: 40px;
+  right: 6%;
+  top: 3%;
+  mix-blend-mode: multiply;
+}
+
+/* Circles */
+.circle01 {
+  background: #f66;
+  border-radius: 50% 50% 50% 70%/50% 50% 70% 60%;
+  animation: border-animation 6s infinite linear;
+}
+.circle02 {
+  background: #f92;
+  border-radius: 80% 30% 50% 50%/50%;
+  animation: border-animation 4s infinite linear;
+}
+.circle03 {
+  background: #fc2;
+  border-radius: 40% 40% 50% 40%/30% 50% 50% 50%;
+  animation: border-animation 3s infinite linear;
+}
+
+/* Animation */
+@keyframes border-animation {
+  to {
+    transform: rotate(360deg);
+  }
+}
