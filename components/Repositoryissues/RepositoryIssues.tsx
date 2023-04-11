@@ -3,6 +3,7 @@ import ReactLoading from "react-loading";
 import { format } from "timeago.js";
 // import styles from "../../styles/Home.module.css";
 import styles from "./RepositoryIssues.module.css";
+import Link from "next/link";
 
 const GET_ISSUES = gql`
   query GetIssues($id: ID!, $cursor: String) {
@@ -18,6 +19,7 @@ const GET_ISSUES = gql`
             node {
               id
               title
+              url
               createdAt
               updatedAt
               closedAt
@@ -71,16 +73,6 @@ export default function RepositoryIssues({ id, setSelectedRepo }: any) {
     setSelectedRepo(null);
   };
 
-  // const handleLoadMore = () => {
-  //   if (!hasNextPage) return;
-
-  //   fetchMore({
-  //     variables: {
-  //       after: endCursor,
-  //     },
-  //   });
-  // };
-
   const handleLoadMore = () => {
     fetchMore({
       variables: { cursor: data.node.issues.pageInfo.endCursor },
@@ -129,24 +121,32 @@ export default function RepositoryIssues({ id, setSelectedRepo }: any) {
           </div>
           <ul className={styles.viewer}>
             {data.node.issues.edges.map((issue: any) => (
-              <li key={issue.node.id} className={styles.viewer_flex}>
-                <div className={styles.data_left}>
-                  <p>{issue.node.title}</p>
-                  <p className={styles.desc}>
-                    author;{issue.node.author.login}
-                  </p>
-                  <p className={styles.desc}>state : {issue.node.state}</p>
-                  <p className={styles.stargazer}>
-                    📝 : {issue.node.comments.totalCount}
-                  </p>
-                  {/* <p>{issue.node.labels.edges.node.name}</p> */}
-                </div>
-                <div className={styles.data_right}>
-                  {/* <p className={styles.updatedDay}>{format(issue.createdAt)}</p> */}
-                  <p className={styles.updatedDay}>{format(issue.updatedAt)}</p>
-                  {/* <p className={styles.updatedDay}>{format(issue.closedAt)}</p> */}
-                </div>
-              </li>
+              <Link
+                href={issue.node.url}
+                key={issue.node.id}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <li className={styles.viewer_flex}>
+                  <div className={styles.data_left}>
+                    <p>{issue.node.title}</p>
+                    <p className={styles.desc}>
+                      author;{issue.node.author.login}
+                    </p>
+                    <p className={styles.desc}>state : {issue.node.state}</p>
+                    <p className={styles.stargazer}>
+                      📝 : {issue.node.comments.totalCount}
+                    </p>
+                  </div>
+                  <div className={styles.data_right}>
+                    {/* <p className={styles.updatedDay}>{format(issue.createdAt)}</p> */}
+                    <p className={styles.updatedDay}>
+                      {format(issue.updatedAt)}
+                    </p>
+                    {/* <p className={styles.updatedDay}>{format(issue.closedAt)}</p> */}
+                  </div>
+                </li>
+              </Link>
             ))}
           </ul>
 
