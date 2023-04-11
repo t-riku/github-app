@@ -1,82 +1,92 @@
 import Head from "next/head";
 import Image from "next/image";
-import {
-  ApolloClient,
-  createHttpLink,
-  InMemoryCache,
-  gql,
-} from "@apollo/client";
-import { setContext } from "@apollo/client/link/context";
+import { gql, useLazyQuery } from "@apollo/client";
 import styles from "../styles/Home.module.css";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { AiFillGithub } from "react-icons/ai";
 import { DiGithubFull } from "react-icons/di";
-import { QueryDocumentKeys } from "graphql/language/ast";
-import { text } from "stream/consumers";
+import { MdClear } from "react-icons/md";
+import ReactLoading from "react-loading";
+import { format } from "timeago.js";
+import RepositoryIssues from "../components/Repositoryissues/RepositoryIssues";
 
-type Items = {
-  id: string;
-  __typename: string;
-  name: string;
-  description?: string;
-  createdAt: string;
-  updatedAt: string;
-  url?: string;
-};
-
-export default function Home({ items }: any) {
-  // inputに入力されたテキストの情報をtextRefに
-  const textRef = useRef(null);
-  // アイテム（ここではレポジトリ）の情報を保持する状態変数
-  const [showItems, setShowItems] = useState([]);
-  // 何件ヒットしたかを保持する状態変数
-  const [results, setResults] = useState([]);
-
-  useEffect(() => {
-    setShowItems([]);
-    // setShowItems(items);
-  }, []);
-
-  // const search = (value: string) => {
-  //   if (value !== "") {
-  //     const filteredList = items.filter((items: any) =>
-  //       Object.values(items).some(
-  //         (item: string) =>
-  //           item?.toUpperCase().indexOf(value.trim().toUpperCase()) !== -1
-  //       )
-  //     );
-  //     setShowItems(filteredList);
-  //     return;
-  //   }
-
-  //   setShowItems(items);
-  //   return;
-  // };
-
-  // const handleClick = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   setInputValue(e.target.value);
-  //   search(e.target.value);
-  // };
-
-  // 一致しているものをクリックされると返す関数
-  const handleClick = (textRef: any) => {
-    // 検索ボックスに値が入っている場合
-    if (textRef !== "") {
-      const result = items.filter((items: any) => {
-        return items.name
-          .trim()
-          .toLowerCase()
-          .match(textRef.current.value.toLowerCase());
-      });
-      setResults(result);
-      setShowItems(result);
-      return;
+const SEARCH_REPOSITORIES = gql`
+  query SearchRepositories($query: String!, $cursor: String) {
+    search(query: $query, type: REPOSITORY, last: 10, after: $cursor) {
+      repositoryCount
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+      edges {
+        node {
+          ... on Repository {
+            id
+            name
+            url
+            description
+            stargazerCount
+            createdAt
+            updatedAt
+          }
+        }
+      }
     }
-    // そもそもitemsには最初から30個のレポジトリの情報が入っているため、検索ボックスを空白のままにしても30件ヒットするのは当たり前
-    // なので検索を押した時にitemsを取ってこなきゃいけない？
-    setResults(items);
-    setShowItems(items);
+  }
+`;
+
+export default function Home() {
+  // クエリを保持する環境変数
+  const [query, setQuery] = useState("");
+  // ボタンで発火させるためにuseLazyQueryを使う
+  const [searchRepositories, { loading, error, data, fetchMore }] =
+    useLazyQuery(SEARCH_REPOSITORIES);
+
+  // 選択したリポジトリを保持する環境変数
+  const [selectedRepo, setSelectedRepo] = useState(null);
+
+  // const { loading, error, data } = useLazyQuery(SEARCH_REPOSITORIES);
+
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+    // コンポーネントの切り替えをするために
+    setSelectedRepo(null);
+    // searchRepositories 関数を呼び出すと、クエリが実行されます。クエリの変数は、 variables オブジェクトを渡して渡される
+    searchRepositories({ variables: { query } });
+    // searchRepositories({
+    //   variables: { queryString: query },
+    // });
+    console.log(data);
+  };
+
+  const handleLoadMore = () => {
+    fetchMore({
+      variables: { cursor: data.search.pageInfo.endCursor },
+      updateQuery: (previousResult, { fetchMoreResult }) => {
+        const newRepositories = fetchMoreResult.search.edges;
+        const pageInfo = fetchMoreResult.search.pageInfo;
+
+        return newRepositories.length
+          ? {
+              search: {
+                __typename: previousResult.search.__typename,
+                repositoryCount: previousResult.search.repositoryCount,
+                pageInfo: pageInfo,
+                edges: [...previousResult.search.edges, ...newRepositories],
+              },
+            }
+          : previousResult;
+      },
+    });
+  };
+
+  const handleClearBtn = () => {
+    setQuery("");
+  };
+
+  const handleRepoClick = (id: any) => {
+    setSelectedRepo(id);
   };
 
   return (
@@ -100,52 +110,87 @@ export default function Home({ items }: any) {
       </header>
 
       <main className={styles.main}>
-        <input ref={textRef} placeholder="input repository name" type="text" />
-        <button onClick={() => handleClick(textRef)} type="submit">
-          検索
-        </button>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.searchFrame}>
+            <input
+              type="text"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              className={styles.input}
+            />
+            <MdClear className={styles.clearBtn} onClick={handleClearBtn} />
+          </div>
 
-        {results.length === 0 ? (
-          <p>もう一度違う条件で検索して見てください。</p>
-        ) : (
-          <p>{results.length}件ヒットしました！</p>
+          <button
+            type="submit"
+            className={styles.searchBtn}
+            // onClick={handleClearBtn}
+          >
+            Search
+          </button>
+        </form>
+        {loading && (
+          <ReactLoading
+            type="bubbles"
+            color="black"
+            height="50px"
+            width="50px"
+            className="mx-auto"
+          />
         )}
-        {showItems ? (
-          <>
-            <div className={styles.viewer}>
-              {showItems.map((item: any, index: number) => {
-                return (
-                  <ul key={index}>
-                    <li>
-                      {/* リンク先を指定 */}
-                      <Link href={`/${item.id}`} className={styles.issueLink}>
-                        <div className={styles.flex}>
-                          {item.name}
-                          {/* <object data="" type="">
-                            <Link href={item.url} className={styles.github}>
-                              <AiFillGithub />
-                            </Link>
-                          </object> */}
-                        </div>
-                      </Link>
-                    </li>
+        {error && (
+          <p className={styles.errorTxt}>
+            Sorry, there&apos;s been an error...
+          </p>
+        )}
+        {data && selectedRepo === null && (
+          <div>
+            <p className={styles.hitNum}>
+              <span>{data.search.repositoryCount}</span>件ヒットしました！
+            </p>
+            <ul className={styles.viewer}>
+              {data.search.edges.map(({ node }: any) => (
+                <li key={node.id}>
+                  <div
+                    onClick={() => handleRepoClick(node.id)}
+                    className={styles.viewer_flex}
+                  >
+                    <div className={styles.data_left}>
+                      <p className={styles.name}> {node.name}</p>
+                      <p className={styles.desc}>📄 : {node.description}</p>
+                      <p className={styles.stargazer}>
+                        ⭐️ : {node.stargazerCount}
+                      </p>
+                    </div>
 
-                    {item.description ? (
-                      <li key={item.description} className={styles.desc}>
-                        {item.description}
-                      </li>
-                    ) : (
-                      ""
-                    )}
-                  </ul>
-                );
-              })}
-            </div>
-          </>
-        ) : (
-          <>
-            <p>候補がありませんでした。</p>
-          </>
+                    <div className={styles.data_right}>
+                      <p className={styles.updatedDay}>
+                        {format(node.updatedAt)}
+                      </p>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            {/* {selectedRepo && <RepositoryIssues id={selectedRepo} />} */}
+
+            {data && data.search.pageInfo.hasNextPage && (
+              <button
+                onClick={handleLoadMore}
+                disabled={loading}
+                className={styles.loadBtn}
+              >
+                Load More
+              </button>
+            )}
+          </div>
+        )}
+
+        {selectedRepo && (
+          <RepositoryIssues
+            id={selectedRepo}
+            setSelectedRepo={setSelectedRepo}
+          />
         )}
       </main>
 
@@ -164,55 +209,4 @@ export default function Home({ items }: any) {
       </footer>
     </div>
   );
-}
-
-export async function getStaticProps() {
-  const httpLink = createHttpLink({
-    uri: "https://api.github.com/graphql",
-  });
-
-  const authLink = setContext((_, { headers }) => {
-    return {
-      headers: {
-        ...headers,
-        authorization: `Bearer ${process.env.GITHUB_ACCESS_TOKEN}`,
-      },
-    };
-  });
-
-  const client = new ApolloClient({
-    link: authLink.concat(httpLink),
-    cache: new InMemoryCache(),
-  });
-
-  const { data } = await client.query({
-    query: gql`
-      {
-        user(login: "t-riku") {
-          name
-          url
-          repositories(last: 30) {
-            totalCount
-            nodes {
-              id
-              name
-              description
-              createdAt
-              updatedAt
-              url
-            }
-          }
-        }
-      }
-    `,
-  });
-
-  const { user } = data;
-  const items = user.repositories.nodes.map((edge: Items) => edge);
-
-  return {
-    props: {
-      items,
-    },
-  };
 }
