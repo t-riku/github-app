@@ -1,66 +1,116 @@
-import { gql, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import ReactLoading from "react-loading";
 import { format } from "timeago.js";
 import styles from "./RepositoryIssues.module.css";
 import Link from "next/link";
-
-const GET_ISSUES = gql`
-  query GetIssues($id: ID!, $cursor: String) {
-    node(id: $id) {
-      ... on Repository {
-        issues(first: 10, after: $cursor) {
-          totalCount
-          pageInfo {
-            hasNextPage
-            endCursor
-          }
-          edges {
-            node {
-              id
-              title
-              url
-              updatedAt
-              state
-              author {
-                login
-              }
-              comments {
-                totalCount
-              }
-              labels(first: 5) {
-                edges {
-                  node {
-                    name
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
+import GET_ISSUES from "../../graphql/getIssues/getIssuesTypes";
+import { GetIssuesResult } from "../../graphql/getIssues/getIssuesTypes";
 
 export default function RepositoryIssues({ id, setSelectedRepo }: any) {
-  const { loading, error, data, fetchMore } = useQuery(GET_ISSUES, {
-    variables: { id },
-  });
-
-  console.log(data);
+  const { loading, error, data, fetchMore } = useQuery<GetIssuesResult>(
+    GET_ISSUES,
+    {
+      variables: { id },
+    }
+  );
 
   const handleClick = () => {
     setSelectedRepo(null);
   };
 
-  const handleLoadMore = () => {
-    fetchMore({
-      variables: { cursor: data.node.issues.pageInfo.endCursor },
-      updateQuery: (previousResult, { fetchMoreResult }) => {
-        const newIssues = fetchMoreResult.node.issues.edges;
-        const pageInfo = fetchMoreResult.node.issues.pageInfo;
+  // const handleLoadMore = () => {
+  //   fetchMore({
+  //     variables: { cursor: data.node.issues.pageInfo.endCursor },
+  //     updateQuery: (previousResult, { fetchMoreResult }) => {
+  //       const newIssues = fetchMoreResult.node.issues.edges;
+  //       const pageInfo = fetchMoreResult.node.issues.pageInfo;
 
-        return newIssues.length
+  //       return newIssues.length
+  //         ? {
+  //             node: {
+  //               __typename: previousResult.node.__typename,
+  //               issues: {
+  //                 __typename: previousResult.node.issues.__typename,
+  //                 totalCount: fetchMoreResult.node.issues.totalCount,
+  //                 pageInfo: pageInfo,
+  //                 edges: [...previousResult.node.issues.edges, ...newIssues],
+  //               },
+  //             },
+  //           }
+  //         : previousResult;
+  //     },
+  //   });
+  // };
+
+  // type FetchMoreResult = {
+  //   node: {
+  //     issues: {
+  //       pageInfo: {
+  //         endCursor: string;
+  //       };
+  //       edges: {
+  //         node: {
+  //           id: string;
+  //           title: string;
+  //           url: string;
+  //           updatedAt: string;
+  //           state: string;
+  //           author: {
+  //             login: string;
+  //           };
+  //           comments: {
+  //             totalCount: number;
+  //           };
+  //         };
+  //       }[];
+  //     };
+  //   };
+  // };
+
+  type PreviousResult = {
+    node: {
+      __typename: string;
+      issues: {
+        __typename: string;
+        totalCount: number;
+        pageInfo: {
+          endCursor: string;
+          hasNextPage: boolean;
+        };
+        edges: {
+          node: {
+            id: string;
+            title: string;
+            url: string;
+            updatedAt: string;
+            state: string;
+            author: {
+              login: string;
+            };
+            comments: {
+              totalCount: number;
+            };
+          };
+        }[];
+      };
+    };
+  };
+
+  const handleLoadMore = () => {
+    fetchMore<GetIssuesResult, { cursor: string }>({
+      variables: { cursor: data?.node?.issues?.pageInfo?.endCursor },
+      updateQuery: (
+        previousResult: PreviousResult | null | undefined,
+        { fetchMoreResult }
+      ) => {
+        if (!previousResult || !fetchMoreResult?.node?.issues?.edges) {
+          return {};
+        }
+
+        const newIssues = fetchMoreResult?.node?.issues?.edges;
+        const pageInfo = fetchMoreResult?.node?.issues?.pageInfo;
+
+        return newIssues?.length
           ? {
               node: {
                 __typename: previousResult.node.__typename,
@@ -124,10 +174,6 @@ export default function RepositoryIssues({ id, setSelectedRepo }: any) {
                     <p className={styles.stargazer}>
                       📝 : {issue.node.comments.totalCount}
                     </p>
-                    {/* {issue.node.labels &&
-                      issue.node.labels.map((label: any) => (
-                        <p>{label.edges.node.name}</p>
-                      ))} */}
                   </div>
                   <div className={styles.data_right}>
                     <p className={styles.updatedDay}>
