@@ -1,7 +1,6 @@
 import { gql, useQuery } from "@apollo/client";
 import ReactLoading from "react-loading";
 import { format } from "timeago.js";
-// import styles from "../../styles/Home.module.css";
 import styles from "./RepositoryIssues.module.css";
 import Link from "next/link";
 
@@ -9,7 +8,7 @@ const GET_ISSUES = gql`
   query GetIssues($id: ID!, $cursor: String) {
     node(id: $id) {
       ... on Repository {
-        issues(last: 10, after: $cursor) {
+        issues(first: 10, after: $cursor) {
           totalCount
           pageInfo {
             hasNextPage
@@ -20,9 +19,7 @@ const GET_ISSUES = gql`
               id
               title
               url
-              createdAt
               updatedAt
-              closedAt
               state
               author {
                 login
@@ -45,29 +42,12 @@ const GET_ISSUES = gql`
   }
 `;
 
-// query GetIssuesWithPagination($owner: String!, $name: String!, $after: String, $first: Int!) {
-//   repository(owner: $owner, name: $name) {
-//     issues(first: $first, after: $after) {
-//       edges {
-//         cursor
-//         node {
-//           id
-//           title
-//           createdAt
-//         }
-//       }
-//       pageInfo {
-//         hasNextPage
-//         endCursor
-//       }
-//     }
-//   }
-// }
-
 export default function RepositoryIssues({ id, setSelectedRepo }: any) {
   const { loading, error, data, fetchMore } = useQuery(GET_ISSUES, {
     variables: { id },
   });
+
+  console.log(data);
 
   const handleClick = () => {
     setSelectedRepo(null);
@@ -82,11 +62,14 @@ export default function RepositoryIssues({ id, setSelectedRepo }: any) {
 
         return newIssues.length
           ? {
-              search: {
-                __typename: previousResult.node.edges.__typename,
-                repositoryCount: previousResult.node.issues.totalCount,
-                pageInfo: pageInfo,
-                edges: [...previousResult.node.edges.edges, ...newIssues],
+              node: {
+                __typename: previousResult.node.__typename,
+                issues: {
+                  __typename: previousResult.node.issues.__typename,
+                  totalCount: fetchMoreResult.node.issues.totalCount,
+                  pageInfo: pageInfo,
+                  edges: [...previousResult.node.issues.edges, ...newIssues],
+                },
               },
             }
           : previousResult;
@@ -130,20 +113,26 @@ export default function RepositoryIssues({ id, setSelectedRepo }: any) {
                 <li className={styles.viewer_flex}>
                   <div className={styles.data_left}>
                     <p>{issue.node.title}</p>
-                    <p className={styles.desc}>
-                      author;{issue.node.author.login}
-                    </p>
+                    {issue.node.author.login ? (
+                      <p className={styles.desc}>
+                        author;{issue.node.author.login}
+                      </p>
+                    ) : (
+                      ""
+                    )}
                     <p className={styles.desc}>state : {issue.node.state}</p>
                     <p className={styles.stargazer}>
                       📝 : {issue.node.comments.totalCount}
                     </p>
+                    {/* {issue.node.labels &&
+                      issue.node.labels.map((label: any) => (
+                        <p>{label.edges.node.name}</p>
+                      ))} */}
                   </div>
                   <div className={styles.data_right}>
-                    {/* <p className={styles.updatedDay}>{format(issue.createdAt)}</p> */}
                     <p className={styles.updatedDay}>
-                      {format(issue.updatedAt)}
+                      {format(issue.node.updatedAt)}
                     </p>
-                    {/* <p className={styles.updatedDay}>{format(issue.closedAt)}</p> */}
                   </div>
                 </li>
               </Link>
