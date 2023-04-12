@@ -1,12 +1,12 @@
 # 追加機能
 
-## ○repository 検索機能
+## ○ repository 検索機能
 
 ・repositoryCount を取得してヒット件数を表示
 ・stargazerCount を取得して表示
 ・updatedAt を timeago.js で format 化して最新の更新時刻を表示
 
-## ○issue 閲覧機能
+## ○ issue 閲覧機能
 
 ・totalCount を取得して issue の合計を表示
 ・state,author/login,comments/totalCount を取得して表示
@@ -19,9 +19,9 @@
 ・react-loading で loading 中に loading icon を表示
 ・input box に clear ボタンを配置
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
-
 ## Getting Started
+
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 First, run the development server:
 
