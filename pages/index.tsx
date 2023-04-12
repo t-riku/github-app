@@ -4,7 +4,6 @@ import { gql, useLazyQuery } from "@apollo/client";
 import styles from "../styles/Home.module.css";
 import { useState } from "react";
 import Link from "next/link";
-import { AiFillGithub } from "react-icons/ai";
 import { DiGithubFull } from "react-icons/di";
 import { MdClear } from "react-icons/md";
 import ReactLoading from "react-loading";
@@ -167,11 +166,7 @@ export default function Home() {
                       <p className={styles.stargazer}>
                         ⭐️ : {node.stargazerCount}
                       </p>
-                      {/* <Link href={node.url}>
-                        <DiGithubFull className={styles.githubUrl} />
-                      </Link> */}
                     </div>
-
                     <div className={styles.data_right}>
                       <p className={styles.updatedDay}>
                         {format(node.updatedAt)}
@@ -181,7 +176,6 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-            {/* {selectedRepo && <RepositoryIssues id={selectedRepo} />} */}
 
             {data && data.search.pageInfo.hasNextPage && (
               <button
