@@ -1,0 +1,19 @@
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7rem;
+  padding: 1rem;
+  max-height: 10vh;
+  height: 10vh;
+}
+
+.footer p {
+  font-size: small;
+}
+
+@media screen and (max-width: 1450px) {
+  .footer {
+    display: none;
+  }
+}
