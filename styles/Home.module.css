@@ -267,6 +267,12 @@
   font-size: small;
 }
 
+@media screen and (max-width: 1450px) {
+  .footer {
+    display: none;
+  }
+}
+
 @media screen and (min-width: 1000px) {
   .animateGithub .textGithub {
     top: 4.3%;
