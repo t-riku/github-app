@@ -1,3 +1,24 @@
+# 追加機能
+
+## ○repository 検索機能
+
+・repositoryCount を取得してヒット件数を表示
+・stargazerCount を取得して表示
+・updatedAt を timeago.js で format 化して最新の更新時刻を表示
+
+## ○issue 閲覧機能
+
+・totalCount を取得して issue の合計を表示
+・state,author/login,comments/totalCount を取得して表示
+・url を取得してクリックすると対応した github issue のページが外部ページにリンク
+・updatedAt を timeago.js で format 化して最新の更新時刻を表示
+・repository 検索機能と同様に追加読み込みボタンを配置
+
+## ○ その他
+
+・react-loading で loading 中に loading icon を表示
+・input box に clear ボタンを配置
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
@@ -32,4 +53,5 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
 # github-app
