@@ -2,22 +2,22 @@
 
 ## ○ repository 検索機能
 
-・repositoryCount を取得してヒット件数を表示
-・stargazerCount を取得して表示
-・updatedAt を timeago.js で format 化して最新の更新時刻を表示
+- repositoryCount を取得してヒット件数を表示
+- stargazerCount を取得して表示
+- updatedAt を timeago.js で format 化して最新の更新時刻を表示
 
 ## ○ issue 閲覧機能
 
-・totalCount を取得して issue の合計を表示
-・state,author/login,comments/totalCount を取得して表示
-・url を取得してクリックすると対応した github issue のページが外部ページにリンク
-・updatedAt を timeago.js で format 化して最新の更新時刻を表示
-・repository 検索機能と同様に追加読み込みボタンを配置
+- totalCount を取得して issue の合計を表示
+- state,author/login,comments/totalCount を取得して表示
+- url を取得してクリックすると対応した github issue のページが外部ページにリンク
+- updatedAt を timeago.js で format 化して最新の更新時刻を表示
+- repository 検索機能と同様に追加読み込みボタンを配置
 
 ## ○ その他
 
-・react-loading で loading 中に loading icon を表示
-・input box に clear ボタンを配置
+- react-loading で loading 中に loading icon を表示
+- input box に clear ボタンを配置
 
 ## Getting Started
 
