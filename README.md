@@ -19,7 +19,7 @@
 
 - react-loading で loading 中に loading icon を表示
 - input box に clear ボタンを配置
-- clearBtn を押してもスムーズに input に focus が当たる
+- clear ボタンを押してもスムーズに input に focus が当たる
 - inputbox に入力する際、あらかじめ決めたデータから入力候補を出す
 - data がない時ある時で文章を場合分け
 
