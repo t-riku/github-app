@@ -16,7 +16,6 @@ const SEARCH_REPOSITORIES = gql`
             url
             description
             stargazerCount
-            createdAt
             updatedAt
           }
         }
