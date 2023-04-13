@@ -1,12 +1,11 @@
 import Head from "next/head";
 import { useLazyQuery } from "@apollo/client";
 import styles from "../styles/Home.module.css";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { MdClear } from "react-icons/md";
 import ReactLoading from "react-loading";
 import { format } from "timeago.js";
 import RepositoryIssues from "../components/Repositoryissues/RepositoryIssues";
-// import { SEARCH_REPOSITORIES } from "../graphql/searchRepositories/searchRepositoriesTypes";
 import {
   SearchRepositoriesResult,
   SEARCH_REPOSITORIES,
@@ -17,12 +16,15 @@ export default function Home() {
   const [query, setQuery] = useState("");
   // ボタンで発火させるためにuseLazyQueryを使う
   const [searchRepositories, { loading, error, data, fetchMore }] =
-    useLazyQuery<SearchRepositoriesResult>(SEARCH_REPOSITORIES);
+    useLazyQuery(SEARCH_REPOSITORIES);
 
   // 選択したリポジトリを保持する環境変数
   const [selectedRepo, setSelectedRepo] = useState(null);
 
-  const handleSubmit = (e: any) => {
+  // inputElオブジェクト
+  const inputEl = useRef<HTMLInputElement>(null);
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // コンポーネントの切り替えをするために
     setSelectedRepo(null);
@@ -31,8 +33,8 @@ export default function Home() {
   };
 
   const handleLoadMore = () => {
-    fetchMore({
-      variables: { cursor: data.search.pageInfo.endCursor },
+    fetchMore<SearchRepositoriesResult>({
+      variables: { cursor: data?.search.pageInfo.endCursor },
       updateQuery: (previousResult, { fetchMoreResult }) => {
         const newRepositories = fetchMoreResult.search.edges;
         const pageInfo = fetchMoreResult.search.pageInfo;
@@ -53,6 +55,7 @@ export default function Home() {
 
   const handleClearBtn = () => {
     setQuery("");
+    inputEl.current?.focus();
   };
 
   const handleRepoClick = (id: any) => {
@@ -76,17 +79,15 @@ export default function Home() {
             <input
               type="text"
               value={query}
+              ref={inputEl}
+              // autoFocus={true}
               onChange={(event) => setQuery(event.target.value)}
               className={styles.input}
             />
             <MdClear className={styles.clearBtn} onClick={handleClearBtn} />
           </div>
 
-          <button
-            type="submit"
-            className={styles.searchBtn}
-            // onClick={handleClearBtn}
-          >
+          <button type="submit" className={styles.searchBtn}>
             Search
           </button>
         </form>
@@ -107,38 +108,67 @@ export default function Home() {
         )}
         {data && selectedRepo === null && (
           <div>
-            <p className={styles.hitNum}>
-              <span>{data.search.repositoryCount}</span>件ヒットしました！
-            </p>
-            <ul className={styles.viewer}>
-              {data.search.edges.map(({ node }: any) => (
-                <li key={node.id}>
-                  <div
-                    onClick={() => handleRepoClick(node.id)}
-                    className={styles.viewer_flex}
-                  >
-                    <div className={styles.data_left}>
-                      <p className={styles.name}> {node.name}</p>
-                      {node.description ? (
-                        <p className={styles.desc}>📄 : {node.description}</p>
-                      ) : (
-                        <p className={styles.noDesc}>
-                          📄 : descriptionは設定されていません。
-                        </p>
-                      )}
-                      <p className={styles.stargazer}>
-                        ⭐️ : {node.stargazerCount}
-                      </p>
-                    </div>
-                    <div className={styles.data_right}>
-                      <p className={styles.updatedDay}>
-                        {format(node.updatedAt)}
-                      </p>
+            <div>
+              {data.search.repositoryCount === 0 ? (
+                <div className={styles.hitNum}>
+                  <p>
+                    1件もヒットしませんでした。
+                    <br />
+                    違う条件で検索してみてください！
+                  </p>
+                  <div className="">
+                    <p>例えば..</p>
+                    <div className="">
+                      <span className="">ChatGPT</span>
+                      <span className="">React</span>
+                      <span className="">TailwindCSS</span>
+                      <span>
+                        上記の要素はbuttonになっていて、押すとinput属性のvalueに値が入り、それで検索をかける
+                        <br />
+                        これを最初の初期ページにしてもいいかも
+                      </span>
                     </div>
                   </div>
-                </li>
-              ))}
-            </ul>
+                </div>
+              ) : (
+                <div>
+                  <p className={styles.hitNum}>
+                    <span>{data.search.repositoryCount}</span>件ヒットしました！
+                  </p>
+                  <ul className={styles.viewer}>
+                    {data.search.edges.map(({ node }: any) => (
+                      <li key={node.id}>
+                        <div
+                          onClick={() => handleRepoClick(node.id)}
+                          className={styles.viewer_flex}
+                        >
+                          <div className={styles.data_left}>
+                            <p className={styles.name}> {node.name}</p>
+                            {node.description ? (
+                              <p className={styles.desc}>
+                                📄 : {node.description}
+                              </p>
+                            ) : (
+                              <p className={styles.noDesc}>
+                                📄 : descriptionは設定されていません。
+                              </p>
+                            )}
+                            <p className={styles.stargazer}>
+                              ⭐️ : {node.stargazerCount}
+                            </p>
+                          </div>
+                          <div className={styles.data_right}>
+                            <p className={styles.updatedDay}>
+                              {format(node.updatedAt)}
+                            </p>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
 
             {data && data.search.pageInfo.hasNextPage && (
               <button
