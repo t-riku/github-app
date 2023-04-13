@@ -1,72 +1,44 @@
 import { gql } from "@apollo/client";
 
-// export interface GetIssuesResult {
-//   node: {
-//     issues: {
-//       totalCount: number;
-//       pageInfo: {
-//         hasNextPage: boolean;
-//         endCursor: string | null;
-//       };
-//       edges: {
-//         node: {
-//           id: string;
-//           title: string;
-//           url: string;
-//           updatedAt: string;
-//           state: string;
-//           author: {
-//             login: string;
-//           };
-//           comments: {
-//             totalCount: number;
-//           };
-//         };
-//       }[];
-//     } | null;
-//   } | null;
-// }
-
-export interface GetIssuesVariables {
-  id: string;
-  cursor?: string;
-}
-
-export interface IssueNode {
-  id: string;
-  title: string;
-  url: string;
-  updatedAt: string;
-  state: string;
-  author: {
-    login: string;
-  };
-  comments: {
-    totalCount: number;
-  };
-}
-
-export interface IssueEdge {
-  node: IssueNode;
-}
-
-export interface IssuesData {
-  totalCount: number;
-  pageInfo: {
-    hasNextPage: boolean;
-    endCursor: string;
-  };
-  edges: IssueEdge[];
-}
-
-export interface GetIssuesResult {
+export interface IssuesQuery {
   node: {
-    issues: IssuesData;
+    __typename: "Repository";
+    issues: {
+      __typename: "IssueConnection";
+      totalCount: number;
+      pageInfo: {
+        __typename: "PageInfo";
+        hasNextPage: boolean;
+        endCursor: string | null;
+      };
+      edges: Array<{
+        __typename: "IssueEdge";
+        node: {
+          __typename: "Issue";
+          id: string;
+          title: string;
+          url: string;
+          updatedAt: string;
+          state: "OPEN" | "CLOSED";
+          author: {
+            __typename: "User";
+            login: string;
+          } | null;
+          comments: {
+            __typename: "IssueCommentConnection";
+            totalCount: number;
+          };
+        };
+      }>;
+    };
   } | null;
 }
 
-const GET_ISSUES = gql`
+export interface IssuesQueryVariables {
+  id: string;
+  cursor?: string | null;
+}
+
+export const GET_ISSUES = gql`
   ${require("./getIssues.graphql").default}
 `;
-
-export default GET_ISSUES;

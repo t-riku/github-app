@@ -2,10 +2,12 @@ import { gql } from "@apollo/client";
 
 export interface SearchRepositoriesResult {
   search: {
+    __typename: string;
     repositoryCount: number;
     pageInfo: {
       endCursor: string | null;
       hasNextPage: boolean;
+      __typename: string;
     };
     edges: {
       node: {
@@ -13,10 +15,15 @@ export interface SearchRepositoriesResult {
         name: string;
         url: string;
         description: string | null;
-        stargazerCount: number;
-        createdAt: string;
         updatedAt: string;
+        stargazers: {
+          totalCount: number;
+          __typename: string;
+        };
+        __typename: string;
       };
+      cursor: string;
+      __typename: string;
     }[];
   };
 }
