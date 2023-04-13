@@ -10,19 +10,27 @@ import {
   SearchRepositoriesResult,
   SEARCH_REPOSITORIES,
 } from "../graphql/searchRepositories/searchRepositoriesTypes";
+import { options } from "../Data/suggestionsData/suggestionsData";
+import { Options } from "../Types/suggestionsTypes";
 
 export default function Home() {
-  // クエリを保持する環境変数
+  // クエリを保持する状態変数
   const [query, setQuery] = useState("");
   // ボタンで発火させるためにuseLazyQueryを使う
   const [searchRepositories, { loading, error, data, fetchMore }] =
     useLazyQuery(SEARCH_REPOSITORIES);
 
-  // 選択したリポジトリを保持する環境変数
+  // 選択したリポジトリを保持する状態変数
   const [selectedRepo, setSelectedRepo] = useState(null);
 
   // inputElオブジェクト
   const inputEl = useRef<HTMLInputElement>(null);
+
+  // inputにフォーカスしているかどうか
+  const [isFocus, setIsFocus] = useState(false);
+
+  // フィルターにかけた配列をいれるための状態変数
+  const [suggestions, setSuggestions] = useState<Options[]>([]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -62,6 +70,24 @@ export default function Home() {
     setSelectedRepo(id);
   };
 
+  // inputフィールドのonChangeイベント
+  const handleChange = (text: string): void => {
+    // 入力した値をもとにフィルターをかける。
+    let matches: Options[] = [];
+
+    if (text.length > 0) {
+      matches = options.filter((opt) => {
+        // new RegExp = パターンでテキストを検索するために使用
+        const regex = new RegExp(`${text}`, "gi");
+        return opt.text.match(regex);
+      });
+    }
+
+    // フィルターをかけた配列をsuggestionsのステートに入れる
+    setSuggestions(matches);
+    setQuery(text);
+  };
+
   return (
     <>
       <Head>
@@ -75,16 +101,38 @@ export default function Home() {
 
       <main className={styles.main}>
         <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.searchFrame}>
-            <input
-              type="text"
-              value={query}
-              ref={inputEl}
-              // autoFocus={true}
-              onChange={(event) => setQuery(event.target.value)}
-              className={styles.input}
-            />
-            <MdClear className={styles.clearBtn} onClick={handleClearBtn} />
+          <div className="">
+            <div className={styles.searchFrame}>
+              <input
+                type="text"
+                value={query}
+                ref={inputEl}
+                onFocus={() => setIsFocus(true)}
+                onChange={(e) => handleChange(e.target.value)}
+                className={styles.input}
+                placeholder="repository name.."
+              />
+              <MdClear className={styles.clearBtn} onClick={handleClearBtn} />
+            </div>
+            {isFocus && query.length > 0 && (
+              <div className={styles.suggestionsBox}>
+                {/* optionsの配列を入力候補の部分に表示する */}
+                {suggestions?.map((suggestion, i) => (
+                  <div
+                    key={i}
+                    className={styles.suggestionsItem}
+                    // 入力候補をクリックするとクリックした入力候補がinputフィールドに入力される。
+                    // isFocusをfalseにすることで入力候補を非表示にする
+                    onClick={async () => {
+                      await setQuery(suggestion.text);
+                      await setIsFocus(false);
+                    }}
+                  >
+                    {suggestion.text}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <button type="submit" className={styles.searchBtn}>
