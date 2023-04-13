@@ -5,6 +5,7 @@
 - repositoryCount を取得してヒット件数を表示
 - stargazerCount を取得して表示
 - updatedAt を timeago.js で format 化して最新の更新時刻を表示
+- word をこちらで提示してそれを押すと検索ボックスに入り、検索できる機能
 
 ## ○ issue 閲覧機能
 
@@ -18,6 +19,9 @@
 
 - react-loading で loading 中に loading icon を表示
 - input box に clear ボタンを配置
+- clearBtn を押してもスムーズに input に focus が当たる
+- inputbox に入力する際、あらかじめ決めたデータから入力候補を出す
+- data がない時ある時で文章を場合分け
 
 ## Getting Started
 
