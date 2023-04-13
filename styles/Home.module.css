@@ -137,6 +137,21 @@
   font-weight: bold;
 }
 
+.noHitTxt {
+  margin-bottom: 2.5rem;
+}
+
+.wordsBox {
+  font-weight: 500;
+  margin-top: 1rem;
+}
+
+.wordsItem {
+  border: 1px solid #000;
+  border-radius: 9999;
+  padding: 1rem;
+}
+
 .viewer {
   overflow-y: scroll;
   height: 60vh;
