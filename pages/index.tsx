@@ -88,6 +88,11 @@ export default function Home() {
     setQuery(text);
   };
 
+  const handleWordClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const target = e.target as HTMLButtonElement;
+    setQuery(target.innerText);
+  };
+
   return (
     <>
       <Head>
@@ -159,22 +164,32 @@ export default function Home() {
             <div>
               {data.search.repositoryCount === 0 ? (
                 <div className={styles.hitNum}>
-                  <p>
+                  <p className={styles.noHitTxt}>
                     1件もヒットしませんでした。
                     <br />
                     違う条件で検索してみてください！
                   </p>
                   <div className="">
                     <p>例えば..</p>
-                    <div className="">
-                      <span className="">ChatGPT</span>
-                      <span className="">React</span>
-                      <span className="">TailwindCSS</span>
-                      <span>
-                        上記の要素はbuttonになっていて、押すとinput属性のvalueに値が入り、それで検索をかける
-                        <br />
-                        これを最初の初期ページにしてもいいかも
-                      </span>
+                    <div className={styles.wordsBox}>
+                      <button
+                        className={styles.wordsItem}
+                        onClick={handleWordClick}
+                      >
+                        ChatGPT
+                      </button>
+                      <button
+                        className={styles.wordsItem}
+                        onClick={handleWordClick}
+                      >
+                        React
+                      </button>
+                      <button
+                        className={styles.wordsItem}
+                        onClick={handleWordClick}
+                      >
+                        TailwindCSS
+                      </button>
                     </div>
                   </div>
                 </div>
