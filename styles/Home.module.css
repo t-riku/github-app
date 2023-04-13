@@ -18,6 +18,7 @@
   padding-bottom: 1rem;
   display: flex;
   gap: 3px;
+  margin-top: 3rem;
 }
 
 .form input,
@@ -50,6 +51,11 @@
   background: transparent;
   border: 1px solid #242424;
   padding: 10px 20px;
+  border-radius: 2px;
+}
+
+.searchBtn:hover {
+  background: #e7e7e7;
 }
 
 .errorTxt {
@@ -57,13 +63,20 @@
 }
 
 .loadBtn {
-  padding: 1rem;
-  border: 2.8px solid #000;
+  padding: 0.8rem;
+  font-size: 12px;
+  letter-spacing: -0.1px;
+  border: 2.3px solid #000;
   border-radius: 0;
   background: transparent;
   display: flex;
   margin: 0 auto;
-  margin-top: 3rem;
+  margin-top: 3.2rem;
+  border-radius: 2px;
+}
+
+.loadBtn:hover {
+  background: #e7e7e7;
 }
 
 .loadBtn:before {
@@ -73,12 +86,13 @@
   width: calc(100% - 4px);
   height: calc(100% - 4px);
   content: "";
-  -webkit-transition: all 0.3s;
-  transition: all 0.3s;
+  -webkit-transition: all 0.15s;
+  transition: all 0.1s;
   border: 1px solid #000;
+  border-radius: 2px;
 }
 
-.loadBtn:hover:before {
+.loadBtn:active:before {
   top: 0;
   left: 0;
   width: 100%;
@@ -89,6 +103,7 @@
 .hitNum {
   padding: 1rem 0;
   text-align: center;
+  margin-bottom: 1rem;
 }
 
 .hitNum span {
@@ -100,6 +115,7 @@
   height: 60vh;
   width: 100%;
   margin: 0 auto;
+  color: #3b3b3b;
 }
 
 .viewer .name {
@@ -119,10 +135,6 @@
   padding: 0.5rem 1rem;
 }
 
-.viewer ul:hover {
-  background-color: #e4e4e4;
-}
-
 .viewer .viewer_flex {
   display: flex;
   justify-content: space-between;
@@ -136,25 +148,16 @@
   background-color: #efefef;
 }
 
-.viewer .flex .github {
-  position: relative;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  height: fit-content;
-}
-
-.viewer .flex .github:hover {
-  color: #0c9402;
+.viewer .data_left {
+  padding-right: 7rem;
 }
 
 .viewer .desc {
-  color: #525252;
   font-size: 12px;
+  padding-bottom: 1px;
 }
 
 .viewer .noDesc {
-  color: #525252;
   opacity: 0.4;
   font-size: 12px;
 }
@@ -168,11 +171,12 @@
   font-size: 11px;
 }
 
-/* .viewer .githubUrl {
-  width: 2rem;
-  height: auto;
-} */
-
 .viewer .data_right {
   padding-right: 1rem;
+}
+
+@media screen and (max-width: 1450px) {
+  .viewer {
+    height: 50vh;
+  }
 }
