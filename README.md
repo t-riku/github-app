@@ -24,7 +24,7 @@
 - data がない時ある時で文章を場合分け
 - CSS Modules,SCSS により少し冗長な記述となるが、名前の衝突を避けつつ、比較的保守性のあるスタイル
 
-# CSS Modules ,SCSS
+## CSS Modules ,SCSS
 
 ## ○ CSS modules のいい点・悪い点
 
