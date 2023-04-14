@@ -9,6 +9,7 @@ import RepositoryIssues from "../components/Repositoryissues/RepositoryIssues";
 import {
   SearchRepositoriesResult,
   SEARCH_REPOSITORIES,
+  RepositoryEdge,
 } from "../graphql/searchRepositories/searchRepositoriesTypes";
 import { options } from "../Data/suggestionsData/suggestionsData";
 import { Options } from "../Types/suggestionsTypes";
@@ -21,7 +22,7 @@ export default function Home() {
     useLazyQuery(SEARCH_REPOSITORIES);
 
   // 選択したリポジトリを保持する状態変数
-  const [selectedRepo, setSelectedRepo] = useState(null);
+  const [selectedRepo, setSelectedRepo] = useState<string | null>(null);
 
   // inputElオブジェクト
   const inputEl = useRef<HTMLInputElement>(null);
@@ -68,7 +69,7 @@ export default function Home() {
     inputEl.current?.focus();
   };
 
-  const handleRepoClick = (id: any) => {
+  const handleRepoClick = (id: string) => {
     setSelectedRepo(id);
   };
 
@@ -199,7 +200,7 @@ export default function Home() {
                     <span>{data.search.repositoryCount}</span>件ヒットしました！
                   </p>
                   <ul className={styles.viewer}>
-                    {data.search.edges.map(({ node }: any) => (
+                    {data.search.edges.map(({ node }: RepositoryEdge) => (
                       <li key={node.id}>
                         <div
                           onClick={() => handleRepoClick(node.id)}

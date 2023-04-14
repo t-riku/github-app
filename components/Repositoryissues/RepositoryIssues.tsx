@@ -7,9 +7,18 @@ import {
   GET_ISSUES,
   IssuesQuery,
   IssuesQueryVariables,
+  IssueEdge,
 } from "../../graphql/getIssues/getIssuesTypes";
 
-export default function RepositoryIssues({ id, setSelectedRepo }: any) {
+type RepositoryIssuesProps = {
+  id: string;
+  setSelectedRepo: React.Dispatch<React.SetStateAction<string | null>>;
+};
+
+export default function RepositoryIssues({
+  id,
+  setSelectedRepo,
+}: RepositoryIssuesProps) {
   const { loading, error, data, fetchMore } = useQuery(GET_ISSUES, {
     variables: { id },
   });
@@ -18,12 +27,43 @@ export default function RepositoryIssues({ id, setSelectedRepo }: any) {
     setSelectedRepo(null);
   };
 
+  // const handleLoadMore = () => {
+  //   fetchMore<IssuesQuery, IssuesQueryVariables>({
+  //     variables: { cursor: data?.node?.issues?.pageInfo?.endCursor },
+  //     updateQuery: (previousResult, { fetchMoreResult }) => {
+  //       if (!previousResult || !fetchMoreResult?.node?.issues?.edges) {
+  //         return {};
+  //       }
+
+  //       const newIssues = fetchMoreResult?.node?.issues?.edges;
+  //       const pageInfo = fetchMoreResult?.node?.issues?.pageInfo;
+
+  //       return newIssues?.length
+  //         ? {
+  //             node: {
+  //               __typename: previousResult.node?.__typename,
+  //               issues: {
+  //                 __typename: previousResult.node?.issues?.__typename,
+  //                 totalCount: fetchMoreResult.node.issues.totalCount,
+  //                 pageInfo: pageInfo,
+  //                 edges: [
+  //                   ...(previousResult?.node?.issues?.edges ?? []),
+  //                   ...(newIssues ?? []),
+  //                 ],
+  //               },
+  //             },
+  //           }
+  //         : previousResult;
+  //     },
+  //   });
+  // };
+
   const handleLoadMore = () => {
     fetchMore<IssuesQuery, IssuesQueryVariables>({
       variables: { cursor: data?.node?.issues?.pageInfo?.endCursor },
       updateQuery: (previousResult, { fetchMoreResult }) => {
-        if (!previousResult || !fetchMoreResult?.node?.issues?.edges) {
-          return {};
+        if (!fetchMoreResult?.node?.issues?.edges) {
+          return previousResult;
         }
 
         const newIssues = fetchMoreResult?.node?.issues?.edges;
@@ -98,7 +138,7 @@ export default function RepositoryIssues({ id, setSelectedRepo }: any) {
                 </div>
 
                 <ul className={styles.viewer}>
-                  {data.node.issues.edges.map((issue: any) => (
+                  {data.node.issues.edges.map((issue: IssueEdge) => (
                     <Link
                       href={issue.node.url}
                       key={issue.node.id}

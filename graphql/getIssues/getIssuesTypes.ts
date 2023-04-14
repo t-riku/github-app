@@ -34,6 +34,28 @@ export interface IssuesQuery {
   } | null;
 }
 
+export interface IssueEdge {
+  __typename: "IssueEdge";
+  node: IssueNode;
+}
+
+interface IssueNode {
+  __typename: "Issue";
+  id: string;
+  title: string;
+  url: string;
+  updatedAt: string;
+  state: "OPEN" | "CLOSED";
+  author: {
+    __typename: "User";
+    login: string;
+  } | null;
+  comments: {
+    __typename: "IssueCommentConnection";
+    totalCount: number;
+  };
+}
+
 export interface IssuesQueryVariables {
   id: string;
   cursor?: string | null;
