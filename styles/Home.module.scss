@@ -1,0 +1,110 @@
+@use "./common/_viewer.scss";
+@use "./common/_loadBtn.scss";
+@use "./common/_variables" as variables;
+
+.main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 6rem;
+  max-height: 80vh;
+  height: 80vh;
+
+  .form {
+    padding-bottom: 1rem;
+    display: flex;
+    gap: 3px;
+    margin-top: 3rem;
+
+    input,
+    button {
+      padding: 10px 20px;
+    }
+
+    input:focus {
+      box-shadow: 0 0 5px 0 rgba(255, 153, 0, 1);
+      border: 2px solid variables.$white;
+      outline: 0;
+    }
+  }
+
+  .suggestionsBox {
+    overflow-y: scroll;
+    width: 100%;
+    max-height: 20vh;
+    height: fit-content;
+    box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.25);
+    background-color: variables.$suggestionColor;
+    border-radius: 2px;
+
+    .suggestionsItem {
+      cursor: pointer;
+      background-color: variables.$suggestionColor;
+      padding: 5px;
+      padding-left: 23px;
+      font-size: 12px;
+
+      &:first-of-type {
+        padding-top: 9px;
+      }
+
+      &:hover {
+        background-color: variables.$hoverColor;
+      }
+    }
+  }
+
+  .searchFrame {
+    position: relative;
+    display: inline-block;
+
+    .clearBtn {
+      width: 18px;
+      height: 18px;
+      aspect-ratio: 1/1;
+      position: absolute;
+      right: 8px;
+      top: 10px;
+      cursor: pointer;
+    }
+  }
+
+  .searchBtn {
+    background: transparent;
+    border: 1px solid variables.$black;
+    padding: 10px 20px;
+    border-radius: 2px;
+    height: fit-content;
+
+    &:hover {
+      background: variables.$hoverColor;
+    }
+  }
+
+  .hitNum {
+    padding: 1rem 0;
+    text-align: center;
+    margin-bottom: 1rem;
+
+    span {
+      font-weight: bold;
+    }
+  }
+
+  .noHitTxt {
+    margin-bottom: 2.5rem;
+  }
+
+  .wordsBox {
+    font-weight: 500;
+    margin-top: 1rem;
+
+    .wordsItem {
+      border: 1px solid variables.$black;
+      border-radius: 9999;
+      padding: 1rem;
+    }
+  }
+}

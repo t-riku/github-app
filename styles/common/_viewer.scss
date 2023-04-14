@@ -1,0 +1,75 @@
+@use "_variables.scss" as variables;
+
+.viewer {
+  overflow-y: scroll;
+  height: 60vh;
+  width: 100%;
+  margin: 0 auto;
+  color: #3b3b3b;
+
+  .name {
+    font-weight: bolder;
+    font-size: 17px;
+    padding-bottom: 7px;
+  }
+
+  .issueLink {
+    z-index: 2;
+    position: relative;
+  }
+
+  ul {
+    list-style: none;
+    margin-bottom: 0.1rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .viewer_flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: #b3b3b3 1px solid;
+    padding: 1.5rem 1rem;
+    cursor: pointer;
+
+    &:hover {
+      background-color: variables.$hoverColor;
+    }
+  }
+
+  .data_left {
+    padding-right: 7rem;
+  }
+
+  .desc {
+    font-size: 12px;
+    padding-bottom: 1px;
+
+    &.noDesc {
+      opacity: 0.4;
+      font-size: 12px;
+    }
+  }
+
+  .state {
+    font-size: 12px;
+    padding: 1px 0;
+  }
+
+  .createdDay,
+  .updatedDay {
+    font-size: 11px;
+  }
+
+  .stargazer {
+    font-size: 11px;
+  }
+
+  .data_right {
+    padding-right: 1rem;
+  }
+
+  @media screen and (max-width: 1450px) {
+    height: 50vh;
+  }
+}

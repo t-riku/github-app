@@ -1,0 +1,50 @@
+@use "../../styles/common/_viewer.scss";
+@use "../../styles/common/_loadBtn.scss";
+@use "../../styles/common/_variables.scss" as variables;
+
+.issuesFlex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6rem;
+  margin-bottom: 1rem;
+
+  .backBtn {
+    background: transparent;
+    border: 1px solid #242424;
+    padding: 7px 10px;
+    border-radius: 2px;
+    width: max-content;
+    margin-left: 0.8rem;
+    font-size: 10px;
+
+    &:hover {
+      background: variables.$hoverColor;
+    }
+  }
+
+  .clickDesc {
+    font-size: 10px;
+    letter-spacing: -0.2px;
+    opacity: 0.6;
+    margin-right: 0.8rem;
+  }
+}
+
+.hitNum {
+  padding: 1rem 0;
+  text-align: center;
+
+  span {
+    font-weight: bold;
+  }
+}
+
+.noHitTxt {
+  padding: 1rem 0;
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 13px;
+  opacity: 0.8;
+  margin-top: 1rem;
+}

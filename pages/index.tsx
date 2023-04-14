@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { useLazyQuery } from "@apollo/client";
-import styles from "../styles/Home.module.css";
+import styles from "../styles/Home.module.scss";
 import { useState, useRef } from "react";
 import { MdClear } from "react-icons/md";
 import ReactLoading from "react-loading";
@@ -15,7 +15,7 @@ import { Options } from "../Types/suggestionsTypes";
 
 export default function Home() {
   // クエリを保持する状態変数
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState<string>("");
   // ボタンで発火させるためにuseLazyQueryを使う
   const [searchRepositories, { loading, error, data, fetchMore }] =
     useLazyQuery(SEARCH_REPOSITORIES);
@@ -27,13 +27,15 @@ export default function Home() {
   const inputEl = useRef<HTMLInputElement>(null);
 
   // inputにフォーカスしているかどうか
-  const [isFocus, setIsFocus] = useState(false);
+  const [isFocus, setIsFocus] = useState<boolean>(false);
 
   // フィルターにかけた配列をいれるための状態変数
   const [suggestions, setSuggestions] = useState<Options[]>([]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // suggestionsの表示をなくす
+    setIsFocus(false);
     // コンポーネントの切り替えをするために
     setSelectedRepo(null);
     // searchRepositories 関数を呼び出すと、クエリが実行されます。クエリの変数は、 variables オブジェクトを渡して渡される
@@ -155,9 +157,7 @@ export default function Home() {
           />
         )}
         {error && (
-          <p className={styles.errorTxt}>
-            Sorry, there&apos;s been an error...
-          </p>
+          <p className="errorTxt">Sorry, there&apos;s been an error...</p>
         )}
         {data && selectedRepo === null && (
           <div>
