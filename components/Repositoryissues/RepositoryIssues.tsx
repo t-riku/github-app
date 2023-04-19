@@ -3,12 +3,7 @@ import ReactLoading from "react-loading";
 import { format } from "timeago.js";
 import styles from "./RepositoryIssues.module.scss";
 import Link from "next/link";
-import {
-  GET_ISSUES,
-  IssuesQuery,
-  IssuesQueryVariables,
-  IssueEdge,
-} from "../../graphql/getIssues/getIssuesTypes";
+import { GetIssuesQuery, GetIssuesDocument } from "../../generated/graphql";
 
 type RepositoryIssuesProps = {
   id: string;
@@ -19,74 +14,112 @@ export default function RepositoryIssues({
   id,
   setSelectedRepo,
 }: RepositoryIssuesProps) {
-  const { loading, error, data, fetchMore } = useQuery(GET_ISSUES, {
-    variables: { id },
-  });
+  const { loading, error, data, fetchMore } = useQuery<GetIssuesQuery>(
+    GetIssuesDocument,
+    {
+      variables: { id },
+    }
+  );
 
   const handleClick = () => {
     setSelectedRepo(null);
   };
 
-  // const handleLoadMore = () => {
-  //   fetchMore<IssuesQuery, IssuesQueryVariables>({
-  //     variables: { cursor: data?.node?.issues?.pageInfo?.endCursor },
-  //     updateQuery: (previousResult, { fetchMoreResult }) => {
-  //       if (!previousResult || !fetchMoreResult?.node?.issues?.edges) {
-  //         return {};
-  //       }
+  type GetIssuesQueryResult = {
+    node: {
+      __typename: "Repository";
+      issues: {
+        totalCount: number;
+        edges: Array<{
+          node: {
+            id: string;
+            title: string;
+            url: string;
+            updatedAt: string;
+            state: string;
+            author: { login: string };
+            comments: { totalCount: number };
+          };
+        }>;
+        pageInfo: {
+          endCursor: string;
+          hasNextPage: boolean;
+        };
+      };
+    } | null;
+  };
 
-  //       const newIssues = fetchMoreResult?.node?.issues?.edges;
-  //       const pageInfo = fetchMoreResult?.node?.issues?.pageInfo;
+  function isRepository(
+    node: GetIssuesQueryResult["node"]
+  ): node is GetIssuesQueryResult["node"] & {
+    issues: {
+      totalCount: number;
+      edges: Array<{
+        node: {
+          id: string;
+          title: string;
+          url: string;
+          updatedAt: string;
+          state: string;
+          author: { login: string };
+          comments: { totalCount: number };
+        };
+      }>;
+      pageInfo: {
+        endCursor: string;
+        hasNextPage: boolean;
+      };
+    };
+  } {
+    if (node?.__typename === "Repository" && !!node.issues) {
+      node.issues;
+    }
+    return node?.__typename === "Repository" && !!node.issues;
+  }
 
-  //       return newIssues?.length
-  //         ? {
-  //             node: {
-  //               __typename: previousResult.node?.__typename,
-  //               issues: {
-  //                 __typename: previousResult.node?.issues?.__typename,
-  //                 totalCount: fetchMoreResult.node.issues.totalCount,
-  //                 pageInfo: pageInfo,
-  //                 edges: [
-  //                   ...(previousResult?.node?.issues?.edges ?? []),
-  //                   ...(newIssues ?? []),
-  //                 ],
-  //               },
-  //             },
-  //           }
-  //         : previousResult;
-  //     },
-  //   });
-  // };
+  const pickIssues = (issue: GetIssuesQuery | undefined) => {
+    if (issue?.node?.__typename === "Repository") {
+      return issue.node.issues;
+    }
+    return undefined;
+  };
 
   const handleLoadMore = () => {
-    fetchMore<IssuesQuery, IssuesQueryVariables>({
-      variables: { cursor: data?.node?.issues?.pageInfo?.endCursor },
-      updateQuery: (previousResult, { fetchMoreResult }) => {
-        if (!fetchMoreResult?.node?.issues?.edges) {
-          return previousResult;
-        }
+    const node = data?.node;
 
-        const newIssues = fetchMoreResult?.node?.issues?.edges;
-        const pageInfo = fetchMoreResult?.node?.issues?.pageInfo;
+    const issues = pickIssues(data);
+    console.log("issues", issues);
 
-        return newIssues?.length
-          ? {
-              node: {
-                __typename: previousResult.node?.__typename,
-                issues: {
-                  __typename: previousResult.node?.issues?.__typename,
-                  totalCount: fetchMoreResult.node.issues.totalCount,
-                  pageInfo: pageInfo,
-                  edges: [
-                    ...(previousResult?.node?.issues?.edges ?? []),
-                    ...(newIssues ?? []),
-                  ],
-                },
+    if (true) {
+      fetchMore({
+        variables: { cursor: issues?.pageInfo?.endCursor },
+        updateQuery: (previousResult: GetIssuesQuery, { fetchMoreResult }) => {
+          if (!fetchMoreResult?.node) {
+            return previousResult;
+          }
+
+          console.log("fetchMoreResult", fetchMoreResult);
+
+          const newIssues = pickIssues(fetchMoreResult)?.edges ?? [];
+          const pageInfo = pickIssues(fetchMoreResult)?.pageInfo;
+
+          return {
+            node: {
+              ...previousResult.node,
+              issues: {
+                ...pickIssues(previousResult),
+                totalCount: pickIssues(fetchMoreResult)?.totalCount ?? 0,
+                pageInfo: pageInfo,
+                edges: [
+                  ...(pickIssues(previousResult)?.edges ?? []),
+                  ...(newIssues ?? []),
+                ],
               },
-            }
-          : previousResult;
-      },
-    });
+            },
+          };
+        },
+      });
+    }
   };
 
   return (
@@ -106,7 +139,9 @@ export default function RepositoryIssues({
       {data && (
         <>
           <div>
-            {data.node.issues.totalCount === 0 ? (
+            {/* {data?.node?.filter(isRepository) && data.node?.issues.totalCount === 0 ? ( */}
+            {data?.node?.__typename === "Repository" &&
+            data.node?.issues.totalCount === 0 ? (
               <div>
                 <button onClick={handleClick} className={styles.backBtn}>
                   {"<"} Back
@@ -129,7 +164,7 @@ export default function RepositoryIssues({
                     {"<"} Back
                   </button>
                   <p className={styles.hitNum}>
-                    <span>{data.node.issues.totalCount}</span>
+                    <span>{data.node?.issues.totalCount}</span>
                     件のissueが見つかりました!
                   </p>
                   <p className={styles.clickDesc}>
@@ -138,59 +173,68 @@ export default function RepositoryIssues({
                 </div>
 
                 <ul className={styles.viewer}>
-                  {data.node.issues.edges.map((issue: IssueEdge) => (
-                    <Link
-                      href={issue.node.url}
-                      key={issue.node.id}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <li className={styles.viewer_flex}>
-                        <div className={styles.data_left}>
-                          <p className={styles.name}>{issue.node.title}</p>
-                          {issue.node.author ? (
-                            <p className={styles.desc}>
-                              👤 : {issue.node.author.login}
-                            </p>
-                          ) : (
-                            ""
-                          )}
-                          {issue.node.state === "OPEN" ? (
-                            <p className={styles.state}>
-                              🟢 : {issue.node.state}
-                            </p>
-                          ) : (
-                            <p className={styles.state}>
-                              🔴 : {issue.node.state}
-                            </p>
-                          )}
+                  {data?.node?.__typename === "Repository" &&
+                    data.node.issues.edges?.map((issue) => (
+                      <>
+                        {issue?.node && (
+                          <Link
+                            href={issue.node.url}
+                            key={issue.node.id}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <li className={styles.viewer_flex}>
+                              <div className={styles.data_left}>
+                                <p className={styles.name}>
+                                  {issue.node.title}
+                                </p>
+                                {issue.node.author ? (
+                                  <p className={styles.desc}>
+                                    👤 : {issue.node.author.login}
+                                  </p>
+                                ) : (
+                                  ""
+                                )}
+                                {issue.node.state === "OPEN" ? (
+                                  <p className={styles.state}>
+                                    🟢 : {issue.node.state}
+                                  </p>
+                                ) : (
+                                  <p className={styles.state}>
+                                    🔴 : {issue.node.state}
+                                  </p>
+                                )}
 
-                          <p className={styles.stargazer}>
-                            💬 : {issue.node.comments.totalCount}
-                          </p>
-                        </div>
-                        <div className={styles.data_right}>
-                          <p className={styles.updatedDay}>
-                            {format(issue.node.updatedAt)}
-                          </p>
-                        </div>
-                      </li>
-                    </Link>
-                  ))}
+                                <p className={styles.stargazer}>
+                                  💬 : {issue.node.comments.totalCount}
+                                </p>
+                              </div>
+                              <div className={styles.data_right}>
+                                <p className={styles.updatedDay}>
+                                  {format(issue.node.updatedAt)}
+                                </p>
+                              </div>
+                            </li>
+                          </Link>
+                        )}
+                      </>
+                    ))}
                 </ul>
               </div>
             )}
           </div>
 
-          {data && data.node.issues.pageInfo.hasNextPage && (
-            <button
-              onClick={handleLoadMore}
-              disabled={loading}
-              className={styles.loadBtn}
-            >
-              Load More
-            </button>
-          )}
+          {data &&
+            data?.node?.__typename === "Repository" &&
+            data.node.issues.pageInfo.hasNextPage && (
+              <button
+                onClick={handleLoadMore}
+                disabled={loading}
+                className={styles.loadBtn}
+              >
+                Load More
+              </button>
+            )}
         </>
       )}
     </div>

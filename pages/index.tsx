@@ -6,20 +6,22 @@ import { MdClear } from "react-icons/md";
 import ReactLoading from "react-loading";
 import { format } from "timeago.js";
 import RepositoryIssues from "../components/Repositoryissues/RepositoryIssues";
-import {
-  SearchRepositoriesResult,
-  SEARCH_REPOSITORIES,
-  RepositoryEdge,
-} from "../graphql/searchRepositories/searchRepositoriesTypes";
 import { options } from "../Data/suggestionsData/suggestionsData";
-import { Options } from "../Types/suggestionsTypes";
+import { Options } from "../types/suggestionsTypes";
+import {
+  SearchRepositoriesQuery,
+  SearchRepositoriesDocument,
+  Repository,
+} from "../generated/graphql";
 
 export default function Home() {
   // クエリを保持する状態変数
   const [query, setQuery] = useState<string>("");
   // ボタンで発火させるためにuseLazyQueryを使う
   const [searchRepositories, { loading, error, data, fetchMore }] =
-    useLazyQuery(SEARCH_REPOSITORIES);
+    useLazyQuery<SearchRepositoriesQuery>(SearchRepositoriesDocument, {
+      variables: { query: query },
+    });
 
   // 選択したリポジトリを保持する状態変数
   const [selectedRepo, setSelectedRepo] = useState<string | null>(null);
@@ -44,19 +46,22 @@ export default function Home() {
   };
 
   const handleLoadMore = () => {
-    fetchMore<SearchRepositoriesResult>({
+    fetchMore({
       variables: { cursor: data?.search.pageInfo.endCursor },
       updateQuery: (previousResult, { fetchMoreResult }) => {
         const newRepositories = fetchMoreResult.search.edges;
         const pageInfo = fetchMoreResult.search.pageInfo;
 
-        return newRepositories.length
+        return newRepositories?.length
           ? {
               search: {
                 __typename: previousResult.search.__typename,
                 repositoryCount: previousResult.search.repositoryCount,
                 pageInfo: pageInfo,
-                edges: [...previousResult.search.edges, ...newRepositories],
+                edges: [
+                  ...(previousResult.search.edges || []),
+                  ...newRepositories,
+                ],
               },
             }
           : previousResult;
@@ -200,35 +205,40 @@ export default function Home() {
                     <span>{data.search.repositoryCount}</span>件ヒットしました！
                   </p>
                   <ul className={styles.viewer}>
-                    {data.search.edges.map(({ node }: RepositoryEdge) => (
-                      <li key={node.id}>
-                        <div
-                          onClick={() => handleRepoClick(node.id)}
-                          className={styles.viewer_flex}
-                        >
-                          <div className={styles.data_left}>
-                            <p className={styles.name}> {node.name}</p>
-                            {node.description ? (
-                              <p className={styles.desc}>
-                                📄 : {node.description}
+                    {data?.search?.edges
+                      ?.map((e) => e?.node)
+                      .filter((e): e is Repository => {
+                        return e?.__typename === "Repository";
+                      })
+                      .map((edge) => (
+                        <li key={edge.id}>
+                          <div
+                            onClick={() => handleRepoClick(edge.id)}
+                            className={styles.viewer_flex}
+                          >
+                            <div className={styles.data_left}>
+                              <p className={styles.name}> {edge.name}</p>
+                              {edge.description ? (
+                                <p className={styles.desc}>
+                                  📄 : {edge.description}
+                                </p>
+                              ) : (
+                                <p className={styles.edgesc}>
+                                  📄 : descriptionは設定されていません。
+                                </p>
+                              )}
+                              <p className={styles.stargazer}>
+                                ⭐️ : {edge.stargazerCount}
                               </p>
-                            ) : (
-                              <p className={styles.noDesc}>
-                                📄 : descriptionは設定されていません。
+                            </div>
+                            <div className={styles.data_right}>
+                              <p className={styles.updatedDay}>
+                                {format(edge.updatedAt)}
                               </p>
-                            )}
-                            <p className={styles.stargazer}>
-                              ⭐️ : {node.stargazerCount}
-                            </p>
+                            </div>
                           </div>
-                          <div className={styles.data_right}>
-                            <p className={styles.updatedDay}>
-                              {format(node.updatedAt)}
-                            </p>
-                          </div>
-                        </div>
-                      </li>
-                    ))}
+                        </li>
+                      ))}
                   </ul>
                 </div>
               )}
