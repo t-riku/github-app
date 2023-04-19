@@ -1,8 +1,7 @@
 import Image from "next/image";
-import { memo } from "react";
 import styles from "./Footer.module.css";
 
-export const Footer = memo(() => (
+export const Footer = () => (
   <footer className={styles.footer}>
     <a
       href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
@@ -16,4 +15,4 @@ export const Footer = memo(() => (
     </a>
     <p>created with Nextjs, Typescript and GitHub GraphQL API</p>
   </footer>
-));
+);

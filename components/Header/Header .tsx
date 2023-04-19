@@ -1,13 +1,8 @@
 import Link from "next/link";
-import { memo } from "react";
 import { DiGithubFull } from "react-icons/di";
 import styles from "./Header.module.css";
 
-let render = 0;
-
-export const Header = memo(() => {
-  console.log(`render${render}`);
-  render++;
+export const Header = () => {
   return (
     <header className={styles.header}>
       <h1 className={styles.title}>Github Repository Viewer!</h1>
@@ -25,4 +20,4 @@ export const Header = memo(() => {
       </Link>
     </header>
   );
-});
+};
