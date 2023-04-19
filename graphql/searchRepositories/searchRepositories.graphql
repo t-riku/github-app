@@ -1,27 +1,21 @@
-import { gql } from '@apollo/client';
-
-const SEARCH_REPOSITORIES = gql`
-  query SearchRepositories($query: String!, $cursor: String) {
-    search(query: $query, type: REPOSITORY, last: 10, after: $cursor) {
-      repositoryCount
-      pageInfo {
-        endCursor
-        hasNextPage
-      }
-      edges {
-        node {
-          ... on Repository {
-            id
-            name
-            url
-            description
-            stargazerCount
-            updatedAt
-          }
+query SearchRepositories($query: String!, $cursor: String) {
+  search(query: $query, type: REPOSITORY, last: 10, after: $cursor) {
+    repositoryCount
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+    edges {
+      node {
+        ... on Repository {
+          id
+          name
+          url
+          description
+          stargazerCount
+          updatedAt
         }
       }
     }
   }
-`;
-
-export default SEARCH_REPOSITORIES;
+}

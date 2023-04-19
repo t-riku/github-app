@@ -1,6 +1,4 @@
-import { gql } from '@apollo/client';
-
-const GET_ISSUES = gql`
+GET_ISSUES = gql`
   query GetIssues($id: ID!, $cursor: String) {
     node(id: $id) {
       ... on Repository {
