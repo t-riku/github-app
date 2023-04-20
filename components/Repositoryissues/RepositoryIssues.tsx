@@ -25,58 +25,6 @@ export default function RepositoryIssues({
     setSelectedRepo(null);
   };
 
-  type GetIssuesQueryResult = {
-    node: {
-      __typename: "Repository";
-      issues: {
-        totalCount: number;
-        edges: Array<{
-          node: {
-            id: string;
-            title: string;
-            url: string;
-            updatedAt: string;
-            state: string;
-            author: { login: string };
-            comments: { totalCount: number };
-          };
-        }>;
-        pageInfo: {
-          endCursor: string;
-          hasNextPage: boolean;
-        };
-      };
-    } | null;
-  };
-
-  function isRepository(
-    node: GetIssuesQueryResult["node"]
-  ): node is GetIssuesQueryResult["node"] & {
-    issues: {
-      totalCount: number;
-      edges: Array<{
-        node: {
-          id: string;
-          title: string;
-          url: string;
-          updatedAt: string;
-          state: string;
-          author: { login: string };
-          comments: { totalCount: number };
-        };
-      }>;
-      pageInfo: {
-        endCursor: string;
-        hasNextPage: boolean;
-      };
-    };
-  } {
-    if (node?.__typename === "Repository" && !!node.issues) {
-      node.issues;
-    }
-    return node?.__typename === "Repository" && !!node.issues;
-  }
-
   const pickIssues = (issue: GetIssuesQuery | undefined) => {
     if (issue?.node?.__typename === "Repository") {
       return issue.node.issues;
@@ -85,20 +33,15 @@ export default function RepositoryIssues({
   };
 
   const handleLoadMore = () => {
-    const node = data?.node;
-
     const issues = pickIssues(data);
-    console.log("issues", issues);
 
     if (true) {
       fetchMore({
         variables: { cursor: issues?.pageInfo?.endCursor },
         updateQuery: (previousResult: GetIssuesQuery, { fetchMoreResult }) => {
-          if (!fetchMoreResult?.node) {
+          if (!fetchMoreResult.node) {
             return previousResult;
           }
-
-          console.log("fetchMoreResult", fetchMoreResult);
 
           const newIssues = pickIssues(fetchMoreResult)?.edges ?? [];
           const pageInfo = pickIssues(fetchMoreResult)?.pageInfo;
@@ -109,7 +52,7 @@ export default function RepositoryIssues({
               issues: {
                 ...pickIssues(previousResult),
                 totalCount: pickIssues(fetchMoreResult)?.totalCount ?? 0,
-                pageInfo: pageInfo,
+                pageInfo: pageInfo ?? undefined,
                 edges: [
                   ...(pickIssues(previousResult)?.edges ?? []),
                   ...(newIssues ?? []),
@@ -136,12 +79,10 @@ export default function RepositoryIssues({
       {error && (
         <p className="errorTxt">Sorry, there&apos;s been an error...</p>
       )}
-      {data && (
+      {data && data?.node?.__typename === "Repository" && (
         <>
           <div>
-            {/* {data?.node?.filter(isRepository) && data.node?.issues.totalCount === 0 ? ( */}
-            {data?.node?.__typename === "Repository" &&
-            data.node?.issues.totalCount === 0 ? (
+            {data.node?.issues.totalCount === 0 ? (
               <div>
                 <button onClick={handleClick} className={styles.backBtn}>
                   {"<"} Back
@@ -183,7 +124,10 @@ export default function RepositoryIssues({
                             target="_blank"
                             rel="noopener noreferrer"
                           >
-                            <li className={styles.viewer_flex}>
+                            <li
+                              className={styles.viewer_flex}
+                              key={issue.node.id}
+                            >
                               <div className={styles.data_left}>
                                 <p className={styles.name}>
                                   {issue.node.title}
@@ -224,17 +168,15 @@ export default function RepositoryIssues({
             )}
           </div>
 
-          {data &&
-            data?.node?.__typename === "Repository" &&
-            data.node.issues.pageInfo.hasNextPage && (
-              <button
-                onClick={handleLoadMore}
-                disabled={loading}
-                className={styles.loadBtn}
-              >
-                Load More
-              </button>
-            )}
+          {data && data.node.issues.pageInfo.hasNextPage && (
+            <button
+              onClick={handleLoadMore}
+              disabled={loading}
+              className={styles.loadBtn}
+            >
+              Load More
+            </button>
+          )}
         </>
       )}
     </div>
