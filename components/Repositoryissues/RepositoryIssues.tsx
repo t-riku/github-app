@@ -59,7 +59,7 @@ export default function RepositoryIssues({
                 ],
               },
             },
-          };
+          } as GetIssuesQuery;
         },
       });
     }
