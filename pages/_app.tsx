@@ -1,7 +1,7 @@
-import "../styles/globals.scss";
 import type { AppProps } from "next/app";
+import "../styles/globals.scss";
 
-import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
+import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 import { Layout } from "../layout/Layout";
 
 const GITHUB_BASE_URL = "https://api.github.com/graphql";
